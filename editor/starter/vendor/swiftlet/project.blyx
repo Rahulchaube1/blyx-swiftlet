@@ -1,0 +1,16 @@
+use std::cli;
+use std::text;
+use router;
+fn main() {
+    let routes = text_lines("GET /books/:id\nPATCH /books/:id\nGET /books/new");
+    let args = cli_args();
+    let mut method = "PATCH";
+    let mut path = "/books/42?preview=yes";
+    if args_len(args) == 2 { method = args_at(args, 0); path = args_at(args, 1); }
+    if args_len(args) != 0 && args_len(args) != 2 { stderr_line("Usage: project METHOD /path"); process_exit(2); }
+    let reply = sw_dispatch(routes, method, path);
+    println!(args_at(reply, 0));
+    println!(args_at(reply, 1));
+    print!("Allow: "); println!(args_at(reply, 2));
+    print!("Book ID: "); println!(sw_param(args_at(reply, 1), path, "id"));
+}

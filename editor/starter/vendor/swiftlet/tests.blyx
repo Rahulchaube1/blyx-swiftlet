@@ -1,0 +1,25 @@
+use std::cli;
+use swiftlet;
+use router;
+use std::text;
+
+fn check(ok: bool, label: str) {
+    if !ok { stderr_line(label); process_exit(1); }
+}
+
+fn main() {
+    let routes = text_lines("POST /a/:key\nGET /a/fixed\nGET /a/:key\nGET /a/:key\nGET /\nBOGUS /invalid");
+    let ok = sw_dispatch(routes, "POST", "/a/jane?x=1");
+    check(args_at(ok, 0) == "200" && args_at(ok, 2) == "GET, POST", "matching resource and Allow");
+    check(sw_param(args_at(ok, 1), "/a/jane?x=1", "key") == "jane", "captures exclude query");
+    check(args_at(sw_dispatch(routes, "POST", "/a/fixed"), 0) == "405", "literal takes priority even for other methods");
+    check(args_at(sw_dispatch(routes, "POST", "/a/fixed"), 2) == "GET", "Allow belongs to selected resource");
+    check(args_at(sw_dispatch(routes, "GET", "/a/"), 0) == "404", "empty parameter");
+    check(args_at(sw_dispatch(routes, "GET", ""), 0) == "404", "path must start with slash");
+    check(args_at(sw_dispatch(routes, "GET", "/"), 0) == "200", "root");
+    check(args_at(sw_dispatch(routes, "HEAD", "/"), 0) == "405", "explicit HEAD policy");
+    check(args_at(sw_dispatch(routes, "GET", "/invalid"), 0) == "404", "unsupported registration ignored");
+    check(sw_enable(sw_enable(0, "DELETE"), "DELETE") == 32, "repeated method");
+    check(sw_param("/a/:id", "/b/42", "id") == "", "non-matching template");
+    println!("swiftlet checks passed");
+}

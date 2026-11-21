@@ -1,0 +1,8 @@
+use swiftlet;
+
+fn main() {
+    let methods = sw_enable(sw_enable(0, "GET"), "POST");
+    println!(sw_status(true, methods, "GET"));
+    println!(sw_status(true, methods, "DELETE"));
+    println!(sw_status(false, methods, "GET"));
+}

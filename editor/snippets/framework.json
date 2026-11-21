@@ -1,0 +1,78 @@
+{
+  "Swiftlet — runnable example": {
+    "prefix": "blyx-swiftlet-demo",
+    "description": "Distinguish 200, 404 and 405",
+    "isFileTemplate": true,
+    "body": [
+      "// Blyx Swiftlet 0.1.0, MIT OR Apache-2.0",
+      "// https://github.com/Rahulchaube1/blyx-swiftlet/tree/v0.1.0",
+      "// A resource's method set is shared by the dispatcher and the Allow header.",
+      "pub fn sw_flag(method: str) -> i64 {",
+      "    if method == \"GET\" { return 1; \\}",
+      "    if method == \"HEAD\" { return 2; \\}",
+      "    if method == \"POST\" { return 4; \\}",
+      "    if method == \"PUT\" { return 8; \\}",
+      "    if method == \"PATCH\" { return 16; \\}",
+      "    if method == \"DELETE\" { return 32; \\}",
+      "    if method == \"OPTIONS\" { return 64; \\}",
+      "    0",
+      "\\}",
+      "pub fn sw_accepts(mask: i64, method: str) -> bool {",
+      "    let bit = sw_flag(method);",
+      "    if mask < 0 || mask > 127 || bit == 0 { return false; \\}",
+      "    (mask / bit) % 2 == 1",
+      "\\}",
+      "pub fn sw_status(found: bool, mask: i64, method: str) -> i64 {",
+      "    if !found { return 404; \\}",
+      "    if sw_accepts(mask, method) { return 200; \\}",
+      "    405",
+      "\\}",
+      "pub fn sw_enable(mask: i64, method: str) -> i64 {",
+      "    if sw_accepts(mask, method) { return mask; \\}",
+      "    mask + sw_flag(method)",
+      "\\}",
+      "",
+      "fn main() {",
+      "    let methods = sw_enable(sw_enable(0, \"GET\"), \"POST\");",
+      "    println!(sw_status(true, methods, \"GET\"));",
+      "    println!(sw_status(true, methods, \"DELETE\"));",
+      "    println!(sw_status(false, methods, \"GET\"));",
+      "\\}"
+    ]
+  },
+  "Swiftlet — import the framework": {
+    "prefix": "blyx-swiftlet-import",
+    "description": "Use the module from the extracted Swiftlet starter project.",
+    "isFileTemplate": true,
+    "body": [
+      "use vendor::swiftlet::swiftlet;",
+      "",
+      "fn main() {",
+      "    let methods = sw_enable(sw_enable(0, \"GET\"), \"POST\");",
+      "    println!(sw_status(true, methods, \"GET\"));",
+      "    println!(sw_status(true, methods, \"DELETE\"));",
+      "    println!(sw_status(false, methods, \"GET\"));",
+      "\\}"
+    ]
+  },
+  "Swiftlet — sw_flag": {
+    "prefix": "blyx-swiftlet-sw_flag",
+    "body": "sw_flag(${1:method})$0",
+    "description": "Swiftlet public function."
+  },
+  "Swiftlet — sw_accepts": {
+    "prefix": "blyx-swiftlet-sw_accepts",
+    "body": "sw_accepts(${1:mask}, ${2:method})$0",
+    "description": "Swiftlet public function."
+  },
+  "Swiftlet — sw_status": {
+    "prefix": "blyx-swiftlet-sw_status",
+    "body": "sw_status(${1:found}, ${2:mask}, ${3:method})$0",
+    "description": "Build a method set and apply the same status decisions as the router. Start at zero."
+  },
+  "Swiftlet — sw_enable": {
+    "prefix": "blyx-swiftlet-sw_enable",
+    "body": "sw_enable(${1:mask}, ${2:method})$0",
+    "description": "Build a method set and apply the same status decisions as the router. Start at zero."
+  }
+}

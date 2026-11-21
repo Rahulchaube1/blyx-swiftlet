@@ -1,10 +1,14 @@
-<img src="assets/logo.png" width="112" height="112" alt="Swiftlet bird logo">
+<img src="assets/logo.png" width="112" height="112" alt="A dark swiftlet changes direction on long, curved wings.">
 
 # Blyx Swiftlet
 
 Dispatch a method and request path against a table of literal and parameterized routes. Return a matched template and the methods a client can use.
 
 A method error and a missing route mean different things to an HTTP client. If their responses share one fallback, clients lose the list of methods a resource accepts. RFC 9110 requires an Allow field on a 405 response. [HTTP Semantics, §15.5.6](https://www.rfc-editor.org/rfc/rfc9110.html#name-405-method-not-allowed)
+
+## Editor extension
+
+Install **RahulChaube.blyx-swiftlet** to run the worked example and use the framework’s function completions in a Blyx file. Open an empty `.blyx` file, enter `blyx-swiftlet-demo`, then choose **Blyx: Run File**. [Editor downloads](https://www.blyx-lang.space/packages/swiftlet#editor) · [Download the extension](https://github.com/Rahulchaube1/blyxxxx/releases/download/framework-editors-v0.1.0/blyx-swiftlet-0.1.0.vsix) · [Starter with framework source](https://github.com/Rahulchaube1/blyxxxx/releases/download/framework-editors-v0.1.0/blyx-swiftlet-starter-0.1.0.zip)
 
 ## Install and run
 
