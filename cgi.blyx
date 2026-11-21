@@ -1,0 +1,24 @@
+use std::cli;
+use std::text;
+use router;
+
+fn main() {
+    let routes = text_lines("GET /health\nHEAD /health\nGET /books/:id\nHEAD /books/:id");
+    let method = env_get("REQUEST_METHOD", "GET");
+    let path = env_get("PATH_INFO", "/");
+    let reply = sw_dispatch(routes, method, path);
+    let status = args_at(reply, 0);
+    if status == "405" {
+        println!("Status: 405 Method Not Allowed");
+        print!("Allow: "); println!(args_at(reply, 2));
+    } else {
+        if status == "404" { println!("Status: 404 Not Found"); }
+        else { println!("Status: 200 OK"); }
+    }
+    println!("Content-Type: text/plain; charset=utf-8");
+    println!();
+    if method == "HEAD" { return; }
+    if status != "200" { println!(status); return; }
+    if args_at(reply, 1) == "/health" { println!("ready"); return; }
+    print!("Book "); println!(sw_param(args_at(reply, 1), path, "id"));
+}

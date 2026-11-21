@@ -1,0 +1,4 @@
+200
+/books/:id
+Allow: GET, PATCH
+Book ID: 42

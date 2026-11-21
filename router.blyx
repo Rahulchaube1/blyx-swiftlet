@@ -1,0 +1,76 @@
+use std::cli;
+use std::text;
+use swiftlet;
+
+// Each registration is one "METHOD /pattern" line. Literal paths win, even
+// when only the more general pattern would accept the requested method.
+fn sw_quality(pattern: str, path: str) -> i64 {
+    if !text_starts(pattern, "/") || !text_starts(path, "/") { return -1; }
+    let a = text_split(pattern, "/");
+    let b = text_split(path, "/");
+    if args_len(a) != args_len(b) { return -1; }
+    let mut exact = 0;
+    let mut i = 1;
+    while i < args_len(a) {
+        let segment = args_at(a, i);
+        let value = args_at(b, i);
+        if text_starts(segment, ":") {
+            if segment == ":" || value == "" { return -1; }
+        } else {
+            if segment != value { return -1; }
+            exact += 1;
+        }
+        i += 1;
+    }
+    exact
+}
+pub fn sw_allow(mask: i64) -> str {
+    let methods = text_split("GET HEAD POST PUT PATCH DELETE OPTIONS", " ");
+    let mut enabled = args_new();
+    let mut i = 0;
+    while i < args_len(methods) {
+        let m = args_at(methods, i);
+        if sw_accepts(mask, m) { enabled = args_push(enabled, m); }
+        i += 1;
+    }
+    args_join(enabled, ", ")
+}
+pub fn sw_dispatch(routes: arglist, method: str, target: str) -> arglist {
+    let path = text_before(target, "?");
+    let mut best = -1;
+    let mut winner = "";
+    let mut mask = 0;
+    let mut i = 0;
+    while i < args_len(routes) {
+        let parts = text_split(args_at(routes, i), " ");
+        if args_len(parts) == 2 {
+            let m = args_at(parts, 0);
+            let pattern = args_at(parts, 1);
+            let quality = sw_quality(pattern, path);
+            if sw_flag(m) > 0 && quality >= 0 {
+                if quality > best {
+                    best = quality;
+                    winner = pattern;
+                    mask = 0;
+                }
+                if pattern == winner { mask = sw_enable(mask, m); }
+            }
+        }
+        i += 1;
+    }
+    let mut out = args_push(args_new(), int_text(sw_status(best >= 0, mask, method)));
+    out = args_push(out, winner);
+    args_push(out, sw_allow(mask))
+}
+pub fn sw_param(pattern: str, target: str, name: str) -> str {
+    let path = text_before(target, "?");
+    if sw_quality(pattern, path) < 0 { return ""; }
+    let parts = text_split(pattern, "/");
+    let values = text_split(path, "/");
+    let mut i = 1;
+    while i < args_len(parts) {
+        if args_at(parts, i) == text_concat(":", name) { return args_at(values, i); }
+        i += 1;
+    }
+    ""
+}
